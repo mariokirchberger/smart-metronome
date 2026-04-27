@@ -1,0 +1,7 @@
+tmp/
+*.wav
+.venv/
+__pycache__/
+*.pyc
+songs.json
+.claude/
