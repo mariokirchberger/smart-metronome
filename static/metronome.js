@@ -594,6 +594,69 @@ document.getElementById('search-btn').addEventListener('click', searchSong);
 
 document.getElementById('song-search').addEventListener('input', renderSongList);
 
+// ── Manual add ─────────────────────────────────────────────────────────────
+
+document.getElementById('manual-toggle').addEventListener('click', () => {
+    const form = document.getElementById('manual-form');
+    const btn  = document.getElementById('manual-toggle');
+    const opening = form.classList.contains('hidden');
+    form.classList.toggle('hidden', !opening);
+    btn.classList.toggle('open', opening);
+    btn.textContent = opening ? '− Manuell hinzufügen' : '+ Manuell hinzufügen';
+});
+
+async function manualAddSong() {
+    const artist   = document.getElementById('manual-artist').value.trim();
+    const title    = document.getElementById('manual-title').value.trim();
+    const bpmRaw   = document.getElementById('manual-bpm').value.trim();
+    const bpm      = parseInt(bpmRaw, 10);
+    const feedback = document.getElementById('manual-feedback');
+    const btn      = document.getElementById('manual-add-btn');
+
+    if (!artist || !title || !bpmRaw || isNaN(bpm) || bpm < 20 || bpm > 300) {
+        feedback.className   = 'manual-feedback error';
+        feedback.textContent = 'Interpret, Titel und BPM (20–300) sind erforderlich.';
+        return;
+    }
+
+    btn.disabled = true;
+    feedback.className = 'manual-feedback hidden';
+
+    try {
+        const res  = await fetch('/api/songs', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ artist, title, bpm }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+            allSongs.push(data);
+            renderSongList();
+            document.getElementById('manual-artist').value = '';
+            document.getElementById('manual-title').value  = '';
+            document.getElementById('manual-bpm').value    = '';
+            feedback.className   = 'manual-feedback success';
+            feedback.textContent = `„${data.artist} – ${data.title}“ wurde hinzugefügt.`;
+        } else {
+            feedback.className   = 'manual-feedback error';
+            feedback.textContent = data.error || 'Fehler beim Speichern.';
+            btn.disabled = false;
+        }
+    } catch (e) {
+        feedback.className   = 'manual-feedback error';
+        feedback.textContent = e.message;
+        btn.disabled = false;
+    }
+}
+
+document.getElementById('manual-add-btn').addEventListener('click', manualAddSong);
+
+['manual-artist', 'manual-title', 'manual-bpm'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter') manualAddSong();
+    });
+});
+
 
 // ── Init ───────────────────────────────────────────────────────────────────
 

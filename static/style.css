@@ -536,6 +536,87 @@ select {
     flex-shrink: 0;
 }
 
+/* ── Manual Add ── */
+
+.manual-toggle-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 9px 0;
+    text-transform: uppercase;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    margin-bottom: 10px;
+}
+
+.manual-toggle-btn:hover,
+.manual-toggle-btn.open {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: #444;
+}
+
+.manual-form {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.manual-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr 80px;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.manual-fields .control-group {
+    align-items: stretch;
+}
+
+.manual-add-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent);
+    border-radius: var(--radius-sm);
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 9px 0;
+    text-transform: uppercase;
+    transition: background 0.15s;
+}
+
+.manual-add-btn:hover     { background: rgba(230, 57, 70, 0.08); }
+.manual-add-btn:disabled  { opacity: 0.5; cursor: not-allowed; }
+
+.manual-feedback {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    padding: 6px 10px;
+    border-radius: 4px;
+}
+
+.manual-feedback.success {
+    background: rgba(76, 175, 80, 0.1);
+    color: #4caf50;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.manual-feedback.error {
+    background: rgba(230, 57, 70, 0.08);
+    color: var(--accent);
+    border: 1px solid rgba(230, 57, 70, 0.2);
+}
+
 .search-row {
     margin-bottom: 10px;
 }

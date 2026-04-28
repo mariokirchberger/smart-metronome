@@ -106,6 +106,26 @@
 
             <div id="search-result" class="search-result hidden"></div>
 
+            <button id="manual-toggle" class="manual-toggle-btn">&#43; Manuell hinzuf&uuml;gen</button>
+            <div id="manual-form" class="manual-form hidden">
+                <div class="manual-fields">
+                    <div class="control-group">
+                        <label for="manual-artist">Interpret</label>
+                        <input type="text" id="manual-artist" class="text-input" placeholder="z. B. AC/DC">
+                    </div>
+                    <div class="control-group">
+                        <label for="manual-title">Titel</label>
+                        <input type="text" id="manual-title" class="text-input" placeholder="z. B. Highway to Hell">
+                    </div>
+                    <div class="control-group">
+                        <label for="manual-bpm">BPM</label>
+                        <input type="text" inputmode="numeric" id="manual-bpm" class="text-input" placeholder="120">
+                    </div>
+                </div>
+                <button id="manual-add-btn" class="manual-add-btn">Hinzuf&uuml;gen</button>
+                <div id="manual-feedback" class="manual-feedback hidden"></div>
+            </div>
+
             <div class="search-row">
                 <input type="text" id="song-search" class="text-input" placeholder="In Liste suchen…">
             </div>
