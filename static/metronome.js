@@ -11,6 +11,7 @@ let nextNoteTime   = 0.0;
 
 // Notes scheduled but not yet drawn; each entry: { beat, time }
 const notesInQueue    = [];
+const mutedBeats      = new Set();
 // Queued dynamic display updates; each entry: { barCount, bpm, time }
 const dynDisplayQueue = [];
 
@@ -29,11 +30,12 @@ const TAP_RESET  = 2000; // ms — gap that resets the tap history
 
 // ── Config ─────────────────────────────────────────────────────────────────
 
-const LOOKAHEAD      = 25.0;  // ms  — scheduler interval
-const SCHEDULE_AHEAD = 0.1;   // sec — how far ahead to schedule audio
-const CLICK_DURATION = 0.04;  // sec
-const FREQ_ACCENT    = 1000;  // Hz — Zählzeit 1
-const FREQ_NORMAL    = 600;   // Hz — andere Zählzeiten
+const LOOKAHEAD        = 25.0;  // ms  — scheduler interval
+const SCHEDULE_AHEAD   = 0.1;   // sec — how far ahead to schedule audio
+const CLICK_DURATION   = 0.04;  // sec
+const FREQ_ACCENT      = 1000;  // Hz — Zählzeit 1
+const FREQ_NORMAL      = 600;   // Hz — andere Zählzeiten
+const FREQ_SUBDIVISION = 800;   // Hz — Unterteilungs-Clicks
 
 // ── DOM helpers ────────────────────────────────────────────────────────────
 
@@ -55,6 +57,10 @@ function getDynStep()    { return Math.max(1,   Math.min(100, parseInt(document.
 
 function isZeitMode() {
     return document.querySelector('.mode-btn.active')?.dataset.mode === 'zeit';
+}
+
+function getSubdivision() {
+    return parseInt(document.querySelector('.subdiv-btn.active')?.dataset.subdiv || '1');
 }
 
 function getAccentVolume() {
@@ -121,33 +127,76 @@ function resetDynDisplay() {
 
 // ── Audio scheduling ───────────────────────────────────────────────────────
 
+function getSubdivisionVolume() {
+    return Math.max(0.001, parseInt(document.getElementById('vol-subdiv').value) / 100);
+}
+
+function shouldAccentMainBeats() {
+    const el = document.getElementById('subdiv-play-beats');
+    return el ? el.checked : true;
+}
+
+function shouldDistinguishSubdivisions() {
+    const el = document.getElementById('subdiv-distinguish');
+    return el ? el.checked : true;
+}
+
+function scheduleSubdivisionClick(time) {
+    const distinguish = shouldDistinguishSubdivisions();
+    const osc  = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+    osc.type            = 'sine';
+    osc.frequency.value = distinguish ? FREQ_SUBDIVISION : FREQ_NORMAL;
+    const volume        = distinguish ? getSubdivisionVolume() : getNormalVolume();
+    gain.gain.setValueAtTime(volume, time);
+    gain.gain.exponentialRampToValueAtTime(0.001, time + CLICK_DURATION);
+    osc.start(time);
+    osc.stop(time + CLICK_DURATION);
+}
+
+function scheduleSubdivisions(beat, beatTime, beatDuration) {
+    if (mutedBeats.has(beat)) return;
+    const subs = getSubdivision();
+    if (subs <= 1) return;
+    for (let i = 1; i < subs; i++) {
+        scheduleSubdivisionClick(beatTime + (i / subs) * beatDuration);
+    }
+}
+
 function scheduleClick(beat, time) {
+    notesInQueue.push({ beat, time });
+
+    if (mutedBeats.has(beat)) return;
+
     const osc  = audioContext.createOscillator();
     const gain = audioContext.createGain();
 
     osc.connect(gain);
     gain.connect(audioContext.destination);
 
-    osc.type            = 'sine';
-    osc.frequency.value = beat === 0 ? FREQ_ACCENT : FREQ_NORMAL;
+    osc.type = 'sine';
+    const isAccent = beat === 0 && shouldAccentMainBeats();
+    osc.frequency.value = isAccent ? FREQ_ACCENT : FREQ_NORMAL;
 
-    const volume = beat === 0 ? getAccentVolume() : getNormalVolume();
+    const volume = isAccent ? getAccentVolume() : getNormalVolume();
     gain.gain.setValueAtTime(volume, time);
     gain.gain.exponentialRampToValueAtTime(0.001, time + CLICK_DURATION);
 
     osc.start(time);
     osc.stop(time + CLICK_DURATION);
-
-    notesInQueue.push({ beat, time });
 }
 
 function scheduler() {
     const limit = audioContext.currentTime + SCHEDULE_AHEAD;
     while (nextNoteTime < limit) {
         const noteTime = nextNoteTime;
+        const beatDur  = getBeatDuration();
 
         scheduleClick(currentBeat, noteTime);
-        nextNoteTime += getBeatDuration();
+        scheduleSubdivisions(currentBeat, noteTime, beatDur);
+        nextNoteTime += beatDur;
         currentBeat = (currentBeat + 1) % getNumerator();
 
         if (isDynamicMode()) {
@@ -297,12 +346,21 @@ function switchTab(tabName) {
 
 // ── Beat indicator DOM ─────────────────────────────────────────────────────
 
+function toggleBeatMute(beatIndex) {
+    mutedBeats.has(beatIndex) ? mutedBeats.delete(beatIndex) : mutedBeats.add(beatIndex);
+    const dot = beatContainer().querySelectorAll('.beat-indicator')[beatIndex];
+    if (dot) dot.classList.toggle('muted', mutedBeats.has(beatIndex));
+}
+
 function rebuildBeatIndicators() {
+    mutedBeats.clear();
     const container = beatContainer();
     container.innerHTML = '';
     for (let i = 0; i < getNumerator(); i++) {
         const dot = document.createElement('div');
         dot.className = 'beat-indicator';
+        dot.title = `Schlag ${i + 1} stummschalten`;
+        dot.addEventListener('click', () => toggleBeatMute(i));
         container.appendChild(dot);
     }
 }
@@ -365,6 +423,44 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => switchDynMode(btn.dataset.mode));
+});
+
+function updateSubdivControls() {
+    const isSubdiv     = getSubdivision() > 1;
+    const distinguish  = shouldDistinguishSubdivisions();
+
+    // "Viertelnoten betonen": only relevant when subdivision > 1
+    const distCheck = document.getElementById('subdiv-distinguish');
+    const distRow   = document.getElementById('subdiv-distinguish-row');
+    distCheck.disabled = !isSubdiv;
+    distRow.classList.toggle('subdiv-off', !isSubdiv);
+
+    // Subdiv volume slider: only relevant when subdivision > 1 AND distinguish is on
+    const subdivSlider = document.getElementById('vol-subdiv');
+    const subdivRow    = document.getElementById('vol-subdiv-row');
+    const sliderActive = isSubdiv && distinguish;
+    subdivSlider.disabled = !sliderActive;
+    subdivRow.classList.toggle('subdiv-off', !sliderActive);
+}
+
+document.querySelectorAll('.subdiv-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.subdiv-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        updateSubdivControls();
+        restartIfPlaying();
+    });
+});
+
+document.getElementById('subdiv-play-beats').addEventListener('change', restartIfPlaying);
+
+document.getElementById('subdiv-distinguish').addEventListener('change', () => {
+    updateSubdivControls();
+    restartIfPlaying();
+});
+
+document.getElementById('vol-subdiv').addEventListener('input', e => {
+    document.getElementById('vol-subdiv-val').textContent = e.target.value + '%';
 });
 
 numeratorInput().addEventListener('change', () => {

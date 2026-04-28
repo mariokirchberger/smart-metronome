@@ -46,6 +46,24 @@
                 </div>
             </div>
 
+            <div class="subdiv-row">
+                <span class="subdiv-label">Unterteilung</span>
+                <div class="subdiv-toggle">
+                    <button class="subdiv-btn active" data-subdiv="1">1/4</button>
+                    <button class="subdiv-btn" data-subdiv="2">1/8</button>
+                    <button class="subdiv-btn" data-subdiv="3">Triolen</button>
+                    <button class="subdiv-btn" data-subdiv="4">1/16</button>
+                </div>
+                <label id="subdiv-beats-row" class="subdiv-beats-row">
+                    <input type="checkbox" id="subdiv-play-beats" checked>
+                    <span>Akzent betonen</span>
+                </label>
+                <label id="subdiv-distinguish-row" class="subdiv-beats-row subdiv-off">
+                    <input type="checkbox" id="subdiv-distinguish" checked disabled>
+                    <span>Viertelnoten betonen</span>
+                </label>
+            </div>
+
             <button id="tap-btn" class="tap-btn">Tap <span class="tap-key">T</span></button>
         </div>
 
@@ -152,6 +170,11 @@
                 <span class="vol-label">Normal</span>
                 <input type="range" id="vol-normal" min="0" max="100" value="60">
                 <span class="vol-value" id="vol-normal-val">60%</span>
+            </div>
+            <div class="volume-row subdiv-off" id="vol-subdiv-row">
+                <span class="vol-label">Subdiv</span>
+                <input type="range" id="vol-subdiv" min="0" max="100" value="35" disabled>
+                <span class="vol-value" id="vol-subdiv-val">35%</span>
             </div>
         </div>
 

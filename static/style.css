@@ -66,6 +66,26 @@ h1 {
     background: var(--beat-idle);
     transition: background 0.06s ease, transform 0.06s ease, box-shadow 0.06s ease;
     flex-shrink: 0;
+    cursor: pointer;
+}
+
+.beat-indicator.muted {
+    background: transparent;
+    border: 2px dashed var(--border);
+    opacity: 0.45;
+}
+
+.beat-indicator.muted.active {
+    background: var(--surface-2);
+    border-color: var(--text-muted);
+    box-shadow: none;
+    transform: scale(1.1);
+}
+
+.beat-indicator.muted.accent.active {
+    background: var(--surface-2);
+    border-color: var(--text-muted);
+    box-shadow: none;
 }
 
 .beat-indicator.active {
@@ -347,6 +367,77 @@ select {
 
 .tap-btn.flash .tap-key {
     background: rgba(255, 255, 255, 0.25);
+}
+
+/* ── Subdivision ── */
+
+.subdiv-row {
+    margin-top: 20px;
+}
+
+.subdiv-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.subdiv-toggle {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border-radius: var(--radius-sm);
+    padding: 4px;
+}
+
+.subdiv-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    border-radius: 5px;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    padding: 7px 0;
+    transition: background 0.15s, color 0.15s;
+}
+
+.subdiv-btn.active {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.subdiv-btn:hover:not(.active) {
+    color: var(--text);
+}
+
+.subdiv-beats-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.subdiv-beats-row input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.subdiv-off {
+    opacity: 0.4;
+    pointer-events: none;
 }
 
 /* ── Analyse Tab ── */

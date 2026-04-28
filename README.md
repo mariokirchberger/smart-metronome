@@ -19,14 +19,29 @@ Die Taktart wird durch zwei separate Eingaben definiert:
 
 Beispiele: 4/4 (vier Viertelschläge), 3/4 (Walzer), 6/8 (sechs Achtelschläge).
 
-**Betonter erster Schlag**
-Die erste Zählzeit eines Taktes erklingt mit einem höheren Ton (1000 Hz) und wird rot hervorgehoben. Alle anderen Schläge erklingen mit einem tieferen Ton (600 Hz) und werden blau hervorgehoben.
-
-**Visuelle Taktanzeige**
-Für jeden Schlag des Taktes wird ein Kreis angezeigt. Der aktuell gespielte Schlag leuchtet auf und wird kurz vergrößert dargestellt.
+**Visuelle Taktanzeige & Schläge stummschalten**
+Für jeden Schlag des Taktes wird ein Kreis angezeigt. Der aktuell gespielte Schlag leuchtet auf und wird kurz vergrößert dargestellt. Ein Klick auf einen Kreis schaltet den zugehörigen Schlag stumm – er blinkt weiterhin zur Orientierung, produziert aber keinen Ton. Ein weiterer Klick hebt die Stummschaltung wieder auf. Beim Ändern der Taktart werden alle Stummschaltungen zurückgesetzt.
 
 **Tap Tempo**
 Über den Tap-Button (oder die Taste `T`) kann das Tempo durch Antippen ermittelt werden. Der Durchschnitt der letzten 8 Taps wird als BPM übernommen. Eine Pause von mehr als 2 Sekunden setzt die Messung zurück.
+
+**Unterteilungen**
+Unter den Taktart-Controls lässt sich eine Unterteilung wählen:
+
+| Option | Wirkung |
+|---|---|
+| 1/4 | Nur Hauptschläge (Standard) |
+| 1/8 | Zusätzlich ein Zwischenschlag pro Viertelschlag |
+| Triolen | Zwei gleichmäßige Zwischenschläge pro Viertelschlag |
+| 1/16 | Drei gleichmäßige Zwischenschläge pro Viertelschlag |
+
+Die Unterteilungsklicks werden exakt per Web Audio API getimed. Stummgeschaltete Schläge unterdrücken auch ihre zugehörigen Unterteilungen.
+
+**Akzent betonen**
+Ist diese Checkbox aktiviert (Standard), erklingt der erste Schlag eines Taktes mit 1000 Hz als Akzent. Deaktiviert klingt Beat 1 wie alle anderen Schläge (600 Hz, Normal-Lautstärke).
+
+**Viertelnoten betonen** *(nur bei Unterteilung > 1/4)*
+Ist diese Checkbox aktiviert (Standard), klingen Unterteilungsklicks klanglich anders als die Hauptschläge (800 Hz, eigene Lautstärke). Deaktiviert klingen alle Klicks gleich (600 Hz, Normal-Lautstärke) – der Subdiv-Lautstärkeregler wird dabei deaktiviert.
 
 ---
 
@@ -76,10 +91,11 @@ Die gespeicherten Songs werden in einer durchsuchbaren Liste angezeigt. Ein Klic
 
 ### Lautstärke
 
-Unterhalb der Tabs befinden sich zwei Lautstärkeregler, die in beiden Modi aktiv sind:
+Unterhalb der Tabs befinden sich Lautstärkeregler, die in allen Modi aktiv sind:
 
-- **Akzent** – Lautstärke der ersten Zählzeit (betonter Schlag)
-- **Normal** – Lautstärke aller weiteren Schläge
+- **Akzent** – Lautstärke der ersten Zählzeit
+- **Normal** – Lautstärke aller weiteren Hauptschläge
+- **Subdiv** – Lautstärke der Unterteilungsklicks (nur aktiv wenn Unterteilung > 1/4 und „Viertelnoten betonen" eingeschaltet)
 
 Die Regler wirken sofort, auch während das Metronom läuft.
 
