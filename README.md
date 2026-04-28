@@ -115,6 +115,10 @@ smart-metronome/
 └── README.md
 ```
 
+## Credits
+
+BPM data powered by [GetSongBPM](https://getsongbpm.com) — [getsongbpm.com](https://getsongbpm.com)
+
 ## Lizenz
 
 MIT
