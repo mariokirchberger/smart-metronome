@@ -36,17 +36,30 @@ def _search_getsongbpm(artist, title):
             'GetSongBPM API nicht konfiguriert. '
             'Bitte api_key in config.json eintragen.'
         )
-    lookup = f'{artist} {title}'
     resp = http.get(
-        'https://api.getsongbpm.com/search/',
-        params={'api_key': api_key, 'type': 'both', 'lookup': lookup},
+        'https://api.getsong.co/search/',
+        params={'api_key': api_key, 'type': 'song', 'lookup': title},
+        headers={
+            'User-Agent': 'smart-metronome/1.0 (https://github.com/mariokirchberger/smart-metronome)',
+            'Referer': 'https://github.com/mariokirchberger/smart-metronome',
+        },
         timeout=10,
     )
-    resp.raise_for_status()
-    results = resp.json().get('search', [])
-    if not results:
+    print(f'[getsong.co] status={resp.status_code} body={resp.text[:300]}')
+    if not resp.ok:
+        raise ValueError(f'GetSongBPM Fehler {resp.status_code}: {resp.text[:200]}')
+    data    = resp.json()
+    search  = data.get('search', []) if isinstance(data, dict) else []
+    # API returns a dict with "error" key when nothing found
+    if not isinstance(search, list) or not search:
         return None
-    hit = results[0]
+    # Prefer exact artist match, otherwise take the first result
+    artist_lower = artist.lower()
+    hit = next(
+        (s for s in search
+         if s.get('artist', {}).get('name', '').lower() == artist_lower),
+        search[0],
+    )
     tempo = hit.get('tempo', '0') or '0'
     bpm = int(round(float(tempo)))
     return {

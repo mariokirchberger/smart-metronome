@@ -439,7 +439,7 @@ function renderSongList() {
     }
 
     container.innerHTML = filtered.map(song =>
-        `<div class="song-item" data-id="${song.id}" data-bpm="${song.bpm}">
+        `<div class="song-item" data-id="${song.id}" data-bpm="${song.bpm}" data-artist="${esc(song.artist)}" data-title="${esc(song.title)}">
             <div class="song-info">
                 <span class="song-name">
                     <span class="song-artist">${esc(song.artist)}</span>
@@ -455,7 +455,7 @@ function renderSongList() {
     container.querySelectorAll('.song-item').forEach(item => {
         item.addEventListener('click', e => {
             if (e.target.closest('.song-delete')) return;
-            useSongBpm(parseInt(item.dataset.bpm));
+            useSongBpm(parseInt(item.dataset.bpm), item.dataset.artist, item.dataset.title);
         });
     });
     container.querySelectorAll('.song-delete').forEach(btn => {
@@ -466,9 +466,16 @@ function renderSongList() {
     });
 }
 
-function useSongBpm(bpm) {
+function useSongBpm(bpm, artist, title) {
     bpmInput().value = Math.max(20, Math.min(300, bpm));
-    switchTab('metronom');
+    const bar   = document.getElementById('active-song-bar');
+    const info  = document.getElementById('active-song-info');
+    const bpmEl = document.getElementById('active-song-bpm');
+    if (artist && title) {
+        info.textContent = `${artist} – ${title}`;
+        bpmEl.textContent = `${bpm} BPM`;
+        bar.classList.remove('hidden');
+    }
 }
 
 async function deleteSong(id) {
@@ -581,7 +588,7 @@ document.getElementById('search-result').addEventListener('click', e => {
     const btn = e.target.closest('button');
     if (!btn) return;
     if (btn.id === 'confirm-btn')    confirmSong();
-    if (btn.id === 'use-result-btn') useSongBpm(searchResult?.bpm);
+    if (btn.id === 'use-result-btn') useSongBpm(searchResult?.bpm, searchResult?.artist, searchResult?.title);
 });
 
 document.getElementById('search-btn').addEventListener('click', searchSong);

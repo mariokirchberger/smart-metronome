@@ -60,14 +60,17 @@ Während des Spielens zeigt der Dynamik-Tab das aktuelle Tempo sowie den Fortsch
 
 Im Reiter **Analyse** können Songs mit ihrem BPM-Wert gespeichert und direkt auf das Metronom übertragen werden.
 
+**Aktuelle Anzeige**
+Oben im Tab wird stets der zuletzt geladene Interpret, Titel und BPM-Wert angezeigt, damit beim Durchsuchen der Liste immer erkennbar ist, was das Metronom gerade verwendet.
+
 **BPM-Suche**
-Über die Felder Interpret und Titel wird ein Song in der GetSongBPM-Datenbank gesucht. Das Ergebnis kann mit „Bestätigen & Speichern" in die lokale Liste übernommen oder direkt im Metronom verwendet werden. Voraussetzung: API-Key in `config.json` (siehe Einrichtung).
+Über die Felder Interpret und Titel wird ein Song in der GetSongBPM-Datenbank gesucht. Das Ergebnis kann mit „Bestätigen & Speichern" in die lokale Liste übernommen oder mit „Im Metronom verwenden" direkt geladen werden – der Reiter bleibt dabei auf Analyse. Voraussetzung: API-Key in `config.json` (siehe Einrichtung).
 
 **Manuell hinzufügen**
 Über den Button „Manuell hinzufügen" lassen sich Interpret, Titel und BPM direkt eingeben und zur Liste hinzufügen – ohne API-Suche.
 
 **Song-Liste**
-Die gespeicherten Songs werden in einer durchsuchbaren Liste angezeigt. Ein Klick auf einen Eintrag übernimmt den BPM-Wert sofort in das Metronom. Einträge können einzeln gelöscht werden.
+Die gespeicherten Songs werden in einer durchsuchbaren Liste angezeigt. Ein Klick auf einen Eintrag übernimmt den BPM-Wert ins Metronom und aktualisiert die Aktuelle Anzeige. Einträge können einzeln gelöscht werden.
 
 ---
 
