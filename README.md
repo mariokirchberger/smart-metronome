@@ -71,18 +71,15 @@ Während des Spielens zeigt der Dynamik-Tab das aktuelle Tempo sowie den Fortsch
 
 ---
 
-### Analyse-Modus
+### Songs
 
-Im Reiter **Analyse** können Songs mit ihrem BPM-Wert gespeichert und direkt auf das Metronom übertragen werden.
+Im Reiter **Songs** können Songs mit ihrem BPM-Wert gespeichert und direkt auf das Metronom übertragen werden.
 
 **Aktuelle Anzeige**
 Oben im Tab wird stets der zuletzt geladene Interpret, Titel und BPM-Wert angezeigt, damit beim Durchsuchen der Liste immer erkennbar ist, was das Metronom gerade verwendet.
 
-**BPM-Suche**
-Über die Felder Interpret und Titel wird ein Song in der GetSongBPM-Datenbank gesucht. Das Ergebnis kann mit „Bestätigen & Speichern" in die lokale Liste übernommen oder mit „Im Metronom verwenden" direkt geladen werden – der Reiter bleibt dabei auf Analyse. Voraussetzung: API-Key in `config.json` (siehe Einrichtung).
-
-**Manuell hinzufügen**
-Über den Button „Manuell hinzufügen" lassen sich Interpret, Titel und BPM direkt eingeben und zur Liste hinzufügen – ohne API-Suche.
+**Song hinzufügen**
+Über den Button „Manuell hinzufügen" lassen sich Interpret, Titel und BPM direkt eingeben und zur Liste hinzufügen.
 
 **Song-Liste**
 Die gespeicherten Songs werden in einer durchsuchbaren Liste angezeigt. Ein Klick auf einen Eintrag übernimmt den BPM-Wert ins Metronom und aktualisiert die Aktuelle Anzeige. Einträge können einzeln gelöscht werden.
@@ -108,7 +105,6 @@ Die Regler wirken sofort, auch während das Metronom läuft.
 | Backend / Server | Python 3, Flask |
 | Frontend | HTML, CSS, JavaScript |
 | Audioausgabe | Web Audio API |
-| BPM-Datenbank | [GetSongBPM](https://getsongbpm.com) — [getsongbpm.com](https://getsongbpm.com) |
 
 ## Voraussetzungen
 
@@ -133,20 +129,6 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Einrichtung (optional: BPM-Suche)
-
-Für die automatische BPM-Suche im Analyse-Tab wird ein kostenloser API-Key von [getsongbpm.com/api](https://getsongbpm.com/api) benötigt.
-
-Den erhaltenen Key in `config.json` eintragen:
-
-```json
-{
-  "getsongbpm_api_key": "DEIN_KEY_HIER"
-}
-```
-
-Ohne API-Key funktioniert die manuelle Eingabe im Analyse-Tab weiterhin vollständig.
-
 ## Starten
 
 **Windows – Doppelklick:**
@@ -166,8 +148,8 @@ Anschließend die App im Browser öffnen: [http://localhost:5000](http://localho
 ```
 smart-metronome/
 ├── app.py               # Flask-Server und API-Endpunkte
-├── config.json          # Konfiguration (API-Key)
 ├── requirements.txt     # Python-Abhängigkeiten
+├── songs.json           # Gespeicherte Songs (wird automatisch erstellt)
 ├── start.bat            # Schnellstart (Windows)
 ├── static/
 │   ├── metronome.js     # Metronom-Logik und Web Audio API
@@ -175,10 +157,6 @@ smart-metronome/
 └── templates/
     └── index.html       # Frontend
 ```
-
-## Credits
-
-BPM data powered by [GetSongBPM](https://getsongbpm.com) — [getsongbpm.com](https://getsongbpm.com)
 
 ## Lizenz
 

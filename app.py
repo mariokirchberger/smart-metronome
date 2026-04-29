@@ -1,12 +1,10 @@
 import os
 import json
 import uuid
-import requests as http
 from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
-SONGS_FILE   = 'songs.json'
-CONFIG_FILE  = 'config.json'
+SONGS_FILE  = 'songs.json'
 
 # ── Persistence ────────────────────────────────────────────────────────────
 
@@ -19,54 +17,6 @@ def load_songs():
 def save_songs(songs):
     with open(SONGS_FILE, 'w', encoding='utf-8') as f:
         json.dump(songs, f, indent=2, ensure_ascii=False)
-
-def load_config():
-    if os.path.exists(CONFIG_FILE):
-        with open(CONFIG_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return {}
-
-# ── GetSongBPM ─────────────────────────────────────────────────────────────
-
-def _search_getsongbpm(artist, title):
-    cfg = load_config()
-    api_key = cfg.get('getsongbpm_api_key', '').strip()
-    if not api_key:
-        raise ValueError(
-            'GetSongBPM API nicht konfiguriert. '
-            'Bitte api_key in config.json eintragen.'
-        )
-    resp = http.get(
-        'https://api.getsong.co/search/',
-        params={'api_key': api_key, 'type': 'song', 'lookup': title},
-        headers={
-            'User-Agent': 'smart-metronome/1.0 (https://github.com/mariokirchberger/smart-metronome)',
-            'Referer': 'https://github.com/mariokirchberger/smart-metronome',
-        },
-        timeout=10,
-    )
-    print(f'[getsong.co] status={resp.status_code} body={resp.text[:300]}')
-    if not resp.ok:
-        raise ValueError(f'GetSongBPM Fehler {resp.status_code}: {resp.text[:200]}')
-    data    = resp.json()
-    search  = data.get('search', []) if isinstance(data, dict) else []
-    # API returns a dict with "error" key when nothing found
-    if not isinstance(search, list) or not search:
-        return None
-    # Prefer exact artist match, otherwise take the first result
-    artist_lower = artist.lower()
-    hit = next(
-        (s for s in search
-         if s.get('artist', {}).get('name', '').lower() == artist_lower),
-        search[0],
-    )
-    tempo = hit.get('tempo', '0') or '0'
-    bpm = int(round(float(tempo)))
-    return {
-        'artist': hit.get('artist', {}).get('name', artist),
-        'title':  hit.get('title', title),
-        'bpm':    bpm,
-    }
 
 # ── Routes ─────────────────────────────────────────────────────────────────
 
@@ -103,32 +53,6 @@ def delete_song(song_id):
     songs = [s for s in load_songs() if s.get('id') != song_id]
     save_songs(songs)
     return jsonify({'ok': True})
-
-@app.route('/api/search')
-def search():
-    artist = request.args.get('artist', '').strip()
-    title  = request.args.get('title', '').strip()
-    if not artist or not title:
-        return jsonify({'error': 'Interpret und Titel sind erforderlich.'}), 400
-
-    # Check local list first (case-insensitive)
-    for song in load_songs():
-        if (song.get('artist', '').lower() == artist.lower() and
-                song.get('title', '').lower() == title.lower()):
-            return jsonify({**song, 'source': 'list'})
-
-    # Query GetSongBPM
-    try:
-        result = _search_getsongbpm(artist, title)
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 503
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
-    if not result:
-        return jsonify({'error': f'„{artist} – {title}" wurde nicht gefunden.'}), 404
-
-    return jsonify({**result, 'source': 'getsongbpm'})
 
 
 if __name__ == '__main__':

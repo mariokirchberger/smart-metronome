@@ -495,8 +495,7 @@ document.getElementById('vol-normal').addEventListener('input', e => {
 
 // ── Analyse ────────────────────────────────────────────────────────────────
 
-let allSongs     = [];
-let searchResult = null;   // last result from /api/search
+let allSongs = [];
 
 async function loadSongs() {
     try {
@@ -583,117 +582,6 @@ async function deleteSong(id) {
         console.error('Löschen fehlgeschlagen:', e);
     }
 }
-
-// ── Search ─────────────────────────────────────────────────────────────────
-
-function setResultState(state, html) {
-    const el = document.getElementById('search-result');
-    el.className = `search-result ${state}`;
-    el.innerHTML = html;
-}
-
-function showSearchResult(result) {
-    searchResult = result;
-    const fromList = result.source === 'list';
-    const sourceHtml = fromList
-        ? '<span class="result-source source-list">In Liste</span>'
-        : '<span class="result-source source-getsongbpm">GetSongBPM</span>';
-    const confirmHtml = fromList ? '' :
-        `<button id="confirm-btn" class="confirm-btn">&#10003; Bestätigen &amp; Speichern</button>`;
-
-    setResultState('found', `
-        <div class="result-top">
-            ${sourceHtml}
-            <div class="result-info">
-                <span class="result-name">
-                    <span class="result-artist">${esc(result.artist)}</span> — ${esc(result.title)}
-                </span>
-                <span class="result-bpm">${result.bpm} BPM</span>
-            </div>
-        </div>
-        <div class="result-actions">
-            ${confirmHtml}
-            <button id="use-result-btn" class="use-btn">Im Metronom verwenden</button>
-        </div>
-    `);
-}
-
-async function searchSong() {
-    const artist = document.getElementById('search-artist').value.trim();
-    const title  = document.getElementById('search-title').value.trim();
-    if (!artist || !title) return;
-
-    const btn = document.getElementById('search-btn');
-    btn.disabled = true;
-    setResultState('loading', '<span class="spinner"></span> Suche auf GetSongBPM…');
-
-    try {
-        const res  = await fetch(
-            `/api/search?artist=${encodeURIComponent(artist)}&title=${encodeURIComponent(title)}`
-        );
-        const data = await res.json();
-        if (!res.ok || data.error) {
-            setResultState('error', data.error || 'Unbekannter Fehler');
-            searchResult = null;
-        } else {
-            showSearchResult(data);
-        }
-    } catch (e) {
-        setResultState('error', e.message);
-        searchResult = null;
-    } finally {
-        btn.disabled = false;
-    }
-}
-
-async function confirmSong() {
-    if (!searchResult) return;
-    const btn = document.getElementById('confirm-btn');
-    if (!btn) return;
-    btn.disabled = true;
-    btn.textContent = '…';
-
-    try {
-        const res  = await fetch('/api/songs', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({
-                artist:     searchResult.artist,
-                title:      searchResult.title,
-                bpm:        searchResult.bpm,
-            }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-            btn.textContent = '✓ Gespeichert';
-            btn.classList.add('confirmed');
-            allSongs.push(data);
-            renderSongList();
-        } else {
-            btn.disabled = false;
-            btn.textContent = '✓ Bestätigen & Speichern';
-        }
-    } catch (e) {
-        btn.disabled = false;
-        btn.textContent = '✓ Bestätigen & Speichern';
-    }
-}
-
-// Event delegation on the result box (buttons are dynamic)
-document.getElementById('search-result').addEventListener('click', e => {
-    const btn = e.target.closest('button');
-    if (!btn) return;
-    if (btn.id === 'confirm-btn')    confirmSong();
-    if (btn.id === 'use-result-btn') useSongBpm(searchResult?.bpm, searchResult?.artist, searchResult?.title);
-});
-
-document.getElementById('search-btn').addEventListener('click', searchSong);
-
-['search-artist', 'search-title'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-        if (e.key === 'Enter') searchSong();
-    });
-});
 
 document.getElementById('song-search').addEventListener('input', renderSongList);
 
